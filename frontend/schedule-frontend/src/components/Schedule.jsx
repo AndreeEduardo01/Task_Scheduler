@@ -30,28 +30,43 @@ const Schedule = () => {
     const startOfWeek = getStartOfWeek(selectedYear, selectedWeek);
     const endOfWeek = getEndOfWeek(startOfWeek);
 
-    // Ajustar fetch para obtener tareas de la semana seleccionada
-    fetch(`/tasks?start=${startOfWeek.toISOString()}&end=${endOfWeek.toISOString()}`)
+    // Ajustar fetch para obtener tareas de la semana seleccionada desde la tabla 'scheduled'
+    fetch(`/scheduled?start=${startOfWeek.toISOString()}&end=${endOfWeek.toISOString()}`)
       .then((response) => response.json())
-      .then((data) => setTasks(data))
+      .then((data) => {
+        setTasks(data);
+      })
       .catch((error) => console.error('Error fetching tasks:', error));
   }, [selectedYear, selectedWeek]);
 
   const getTasksForDay = (day) => {
-    return tasks.filter(task => new Date(task.time_init).getDay() === day);
+    const filteredTasks = tasks.filter(task => {
+      const taskDate = new Date(task.time_init);
+      const taskDay = taskDate.getDay();
+      // Convertir taskDay de 0-6 (domingo a sábado) a 1-7 (lunes a domingo)
+      return taskDay === (day === 0 ? 7 : day);
+    });
+    return filteredTasks;
   };
 
   return (
     <div>
-      <WeekSelector onWeekChange={(year, week) => { setSelectedYear(year); setSelectedWeek(week); }} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', height: '800px', border: '1px solid black', overflowY: 'auto' }}>
+      <WeekSelector onWeekChange={(year, week) => { 
+        setSelectedYear('2024'); 
+        setSelectedWeek('37'); 
+      }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', height: '800px', border: '1px solid black', overflowX: 'auto' }}>
         {daysOfWeek.map((day, index) => (
-          <div key={day} style={{ flex: 1, borderLeft: '1px solid black', padding: '10px' }}>
+          <div key={day} style={{ flex: 1, borderLeft: '1px solid black', padding: '10px', position: 'relative' }}>
             <h3>{day}</h3>
-            <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-              {getTasksForDay(index + 1).map((task) => (
-                <Task key={task.id_task} task={task} />
-              ))}
+            <div style={{ position: 'relative', height: '100%' }}>
+              {getTasksForDay(index + 1).length === 0 ? (
+                <p>No tasks for this day</p>
+              ) : (
+                getTasksForDay(index + 1).map((task) => (
+                  <Task key={task.id_task} task={task} />
+                ))
+              )}
             </div>
           </div>
         ))}

@@ -45,7 +45,7 @@ const WeekSelector = ({ onWeekChange }) => {
       <select id="week" value={week} onChange={handleWeekChange}>
         {Array.from({ length: getWeeksInYear(year) }, (_, i) => i + 1).map((weekNum) => (
           <option key={weekNum} value={weekNum}>
-            Week {weekNum}
+            Week {37}
           </option>
         ))}
       </select>
