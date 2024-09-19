@@ -1,6 +1,9 @@
 # routes.py
-from flask import Blueprint, jsonify, request
-from models import db, Task,Scheduled,Users
+from flask import Blueprint, jsonify, request, Flask
+from models import db, Task,Scheduled,Users,Kindoftask,Roles
+from werkzeug.security import check_password_hash
+import jwt
+import datetime
 
 tasks_bp = Blueprint('tasks_bp', __name__)
 
@@ -12,7 +15,7 @@ def schedule_task():
         time_init=data['time_init'],
         duration_estimated=data['duration_estimated'],
         assigned_to=data['assigned_to'],
-        assigned_by=1,  # Puedes obtener el ID del usuario actual si es necesario
+        assigned_by=2,  # Puedes obtener el ID del usuario actual si es necesario
         time_end_estimated= data['time_end_estimated'])
     print(type(new_scheduled_task))
 
@@ -26,8 +29,8 @@ def get_schedules():
     start = request.args.get('start')
     end = request.args.get('end')
 
-    schedules = Scheduled.query.join(Task,Scheduled.id_task == Task.id_task).filter(Scheduled.time_init.between(start,end)).all()
-    
+    schedules = Scheduled.query.join(Task, Scheduled.id_task == Task.id_task).filter(Scheduled.time_init.between(start,end)).all()
+
     return jsonify([{
         'id_scheduled': s.id_scheduled,
         'id_task': s.id_task,
@@ -37,8 +40,8 @@ def get_schedules():
         'time_end_estimated' : s.time_end_estimated,
         'time_end_real' : s.time_end_real,
         'assigned_by' : s.assigned_by,
-        'assigned_to' : s.assigned_to
-        # 'description':Task.description
+        'assigned_to' : s.assigned_to,
+        'description':s.task.description
         # 'assigned_by_user' : s.assigned_by_user
         # 'assigned_to_user' : s.assigned_to_user
     } for s in schedules])
@@ -55,6 +58,21 @@ def get_users():
         } for user in users
     ])
 
+@tasks_bp.route('/users', methods=['POST'])
+def add_user():
+    data = request.json
+    new_user = Users(
+        id_role=data['id_role'],
+        name_user=data['name_user'],
+        password=data['password'],
+        lastname_user=data['lastname_user'],
+        dni_user=data['dni_user'],
+        birthday=data['birthday'],)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'message': 'Task scheduled successfully!'}), 201
 
 @tasks_bp.route('/tasks', methods=['GET'])
 def get_tasks():
@@ -89,3 +107,25 @@ def delete_task(id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({'message': 'Task deleted'})
+
+# LOGIN
+
+@tasks_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    username = data.get('username')
+    password = data.get('password')
+
+    user = Users.query.filter_by(name_user=username).first()
+
+    if user and check_password_hash(user.password, password):
+        # Generar token JWT
+        token = jwt.encode({
+            'user_id': user.id_user,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        }, tasks_bp.config['SECRET_KEY'], algorithm='HS256')
+
+        return jsonify({'token': token}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password'}), 401

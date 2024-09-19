@@ -21,10 +21,8 @@ const getEndOfWeek = (startOfWeek) => {
   return endOfWeek;
 };
 
-const Schedule = () => {
+const Schedule = ({ selectedYear, selectedWeek }) => {
   const [tasks, setTasks] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedWeek, setSelectedWeek] = useState(1);
 
   useEffect(() => {
     const startOfWeek = getStartOfWeek(selectedYear, selectedWeek);
@@ -51,17 +49,13 @@ const Schedule = () => {
 
   return (
     <div>
-      <WeekSelector onWeekChange={(year, week) => { 
-        setSelectedYear('2024'); 
-        setSelectedWeek('37'); 
-      }} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', height: '800px', border: '1px solid black', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', height: '800px', border: '1px solid white', overflowX: 'auto' }}>
         {daysOfWeek.map((day, index) => (
-          <div key={day} style={{ flex: 1, borderLeft: '1px solid black', padding: '10px', position: 'relative' }}>
+          <div key={day} style={{ flex: 1, borderLeft: '1px solid white', padding: '10px', position: 'relative' }}>
             <h3>{day}</h3>
             <div style={{ position: 'relative', height: '100%' }}>
               {getTasksForDay(index + 1).length === 0 ? (
-                <p>No tasks for this day</p>
+                <small>No task Scheduled</small>
               ) : (
                 getTasksForDay(index + 1).map((task) => (
                   <Task key={task.id_task} task={task} />

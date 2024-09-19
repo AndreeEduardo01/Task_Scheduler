@@ -22,15 +22,17 @@ const Task = ({ task }) => {
     backgroundColor: 'lightblue',
     border: '1px solid blue',
     borderRadius: '4px',
-    padding: '5px',
+    padding: '2px',
     boxSizing: 'border-box',
     width: '100%',
+    color: 'black'
   };
   console.log("Describe:",description);
 
   return (
     <div style={taskStyle}>
       {description}
+      <br/>
       {/* {time_init} */}
       {duration_estimated}
     </div>
