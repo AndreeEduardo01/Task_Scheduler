@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:blue@localhost/db_schedule'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'SIDERAL'
 
 db.init_app(app)
 migrate = Migrate(app,db)

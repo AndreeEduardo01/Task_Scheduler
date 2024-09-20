@@ -1,24 +1,38 @@
-// src/components/TaskForm.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TaskForm = () => {
-  
-  const [idKindoftask, setIdKindoftask] = useState('');
+  const [kindoftasks, setKindoftasks] = useState([]);
+  const [selectedKindoftask, setSelectedKindoftask] = useState('');
   const [description, setDescription] = useState('');
   const [createdBy, setCreatedBy] = useState('');
   const [error, setError] = useState('');
 
+  // Obtener tipos de tareas
+  useEffect(() => {
+    const fetchKindoftasks = async () => {
+      try {
+        const response = await fetch('/kindoftasks');
+        const data = await response.json();
+        console.log(data);
+        setKindoftasks(data);
+      } catch (error) {
+        console.error('Error fetching kind of tasks:', error);
+      }
+    };
+
+    fetchKindoftasks();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación básica
-    if (!idKindoftask || !description || !createdBy) {
+    if (!selectedKindoftask || !description || !createdBy) {
       setError('Todos los campos son obligatorios.');
       return;
     }
 
     const task = {
-      id_kindoftask: parseInt(idKindoftask, 10),
+      id_kindoftask: parseInt(selectedKindoftask, 10),
       description,
       created_by: parseInt(createdBy, 10),
     };
@@ -30,8 +44,7 @@ const TaskForm = () => {
         body: JSON.stringify(task),
       });
       if (response.ok) {
-        // Resetear formulario
-        setIdKindoftask('');
+        setSelectedKindoftask('');
         setDescription('');
         setCreatedBy('');
         setError('');
@@ -46,12 +59,18 @@ const TaskForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>ID Kind of Task:</label>
-        <input
-          type="number"
-          value={idKindoftask}
-          onChange={(e) => setIdKindoftask(e.target.value)}
-        />
+        <label>Kind of Task:</label>
+        <select
+          value={selectedKindoftask}
+          onChange={(e) => setSelectedKindoftask(e.target.value)}
+        >
+          <option value="">Seleccione un tipo de tarea</option>
+          {kindoftasks.map((kindoftask) => (
+            <option key={kindoftask.id_kindoftask} value={kindoftask.id_kindoftask}>
+              {kindoftask.name_kindoftask}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label>Description:</label>

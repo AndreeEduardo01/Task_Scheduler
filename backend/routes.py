@@ -1,11 +1,22 @@
 # routes.py
-from flask import Blueprint, jsonify, request, Flask
+from flask import Blueprint, jsonify, request, Flask, current_app
 from models import db, Task,Scheduled,Users,Kindoftask,Roles
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
 tasks_bp = Blueprint('tasks_bp', __name__)
+
+@tasks_bp.route('/kindoftasks', methods=['GET'])
+def get_kindoftasks():
+    kindoftasks= Kindoftask.query.all()
+    return jsonify([
+        {
+        'id_kindoftask': kindoftask.id_kindoftask,
+        'name_kindoftask':kindoftask.name_kindoftask
+         } for kindoftask in kindoftasks
+    ])
+
 
 @tasks_bp.route('/schedule', methods=['POST'])
 def schedule_task():
@@ -64,10 +75,13 @@ def add_user():
     new_user = Users(
         id_role=data['id_role'],
         name_user=data['name_user'],
-        password=data['password'],
+        # password=data['password'],
         lastname_user=data['lastname_user'],
         dni_user=data['dni_user'],
         birthday=data['birthday'],)
+    
+    # Hashear la contraseña antes de guardarla
+    new_user.set_password(data['password'])
 
     db.session.add(new_user)
     db.session.commit()
@@ -109,23 +123,20 @@ def delete_task(id):
     return jsonify({'message': 'Task deleted'})
 
 # LOGIN
-
 @tasks_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-
-    username = data.get('username')
+    dniuser = data.get('dni_user')
     password = data.get('password')
-
-    user = Users.query.filter_by(name_user=username).first()
-
-    if user and check_password_hash(user.password, password):
-        # Generar token JWT
+    returned_user = Users.query.filter_by(dni_user=dniuser).first()
+    if returned_user and returned_user.check_password(password):
+        # Generar token JWT usando la clave secreta de la app
         token = jwt.encode({
-            'user_id': user.id_user,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, tasks_bp.config['SECRET_KEY'], algorithm='HS256')
+            'user_id': str(returned_user.dni_user),
+            'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+        }, current_app.config['SECRET_KEY'], algorithm='HS256')
 
         return jsonify({'token': token}), 200
+
     else:
         return jsonify({'message': 'Invalid username or password'}), 401

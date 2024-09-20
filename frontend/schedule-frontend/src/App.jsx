@@ -14,24 +14,25 @@ const App = () => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showWeekForm, setShowWeekForm] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(false); // Estado para el formulario de login
   // Estados para el año y la semana seleccionada
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedWeek, setSelectedWeek] = useState(1);
 
-
   return (
     <div>
-      {/* <LoginForm /> */}
       <h1>Mi Horario</h1>
       <div className="button-container">
         {/* Botón para mostrar/ocultar TaskForm */}
         <button onClick={() => setShowTaskForm(true)}>+ Task</button>
         {/* Botón para mostrar/ocultar AddUser */}
         <button onClick={() => setShowAddUser(true)}>+ User </button>
-        {/* Botón para  mostrar Selector de Semana */}
+        {/* Botón para mostrar Selector de Semana */}
         <button onClick={() => setShowWeekForm(true)}> * Week </button>
         {/* Botón para mostrar/ocultar AddTask */}
         <button onClick={() => setShowAddTask(true)}>Schedule !</button>
+        {/* Botón para mostrar el formulario de login */}
+        <button onClick={() => setShowLoginForm(true)}>Login</button>
       </div>
 
       {/* Si showTaskForm es true, mostramos el formulario como modal */}
@@ -82,8 +83,20 @@ const App = () => {
         </>
       )}
 
+      {/* Si showLoginForm es true, mostramos el formulario de login */}
+      {showLoginForm && (
+        <>
+          <div className="overlay" onClick={() => setShowLoginForm(false)}></div>
+          <div className="modal">
+            <LoginForm />
+            <button onClick={() => setShowLoginForm(false)}>Ocultar Login</button>
+          </div>
+        </>
+      )}
+
       {/* Pasamos los estados y funciones de actualización a Schedule */}
       <Schedule selectedYear={selectedYear} selectedWeek={selectedWeek} />
+      <br />
     </div>
   );
 };

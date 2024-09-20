@@ -19,6 +19,16 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/schedule/, '/schedule'),
+      },
+      '/kindoftasks': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/kindoftasks/, '/kindoftasks'),
+      },
+      '/login': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/login/, '/login'),
       }
       }
     },

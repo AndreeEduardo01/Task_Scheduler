@@ -49,11 +49,11 @@ const Schedule = ({ selectedYear, selectedWeek }) => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', height: '800px', border: '1px solid white', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', height: '1000px', border: '1px solid white', overflowX: 'auto', overflowY: 'hidden' }}>
         {daysOfWeek.map((day, index) => (
           <div key={day} style={{ flex: 1, borderLeft: '1px solid white', padding: '10px', position: 'relative' }}>
             <h3>{day}</h3>
-            <div style={{ position: 'relative', height: '100%' }}>
+            <div style={{ position: 'relative', height: '1000px' }}>
               {getTasksForDay(index + 1).length === 0 ? (
                 <small>No task Scheduled</small>
               ) : (
